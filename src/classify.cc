@@ -85,7 +85,7 @@ struct OutputData {
 
 void ParseCommandLine(int argc, char **argv, Options &opts);
 void usage(int exit_code=EX_USAGE);
-void ProcessFiles(const char *filename1, const char *filename2,
+void ProcessFiles(const char *filename1, const char *filename_1, const char *filename2, const char *filename_2,
     KeyValueStore *hash, Taxonomy &tax,
     IndexOptions &idx_opts, Options &opts, ClassificationStats &stats,
     OutputStreamData &outputs, taxon_counters_t &total_taxon_counters);
@@ -97,7 +97,7 @@ taxid_t ClassifySequence(Sequence &dna, Sequence &dna2, ostringstream &koss,
 void AddHitlistString(ostringstream &oss, vector<taxid_t> &taxa,
     Taxonomy &taxonomy);
 taxid_t ResolveTree(taxon_counts_t &hit_counts,
-    Taxonomy &tax, size_t total_minimizers, Options &opts);
+    Taxonomy &tax, size_t total_minimizers, Options &opts, const char *filename);
 void ReportStats(struct timeval time1, struct timeval time2,
     ClassificationStats &stats);
 void InitializeOutputs(Options &opts, OutputStreamData &outputs, SequenceFormat format);
@@ -157,11 +157,14 @@ int main(int argc, char **argv) {
         if (i + 1 == argc) {
           errx(EX_USAGE, "paired end processing used with unpaired file");
         }
-        ProcessFiles(argv[i], argv[i+1], hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
-        i += 1;
+        printf("\n processing %s and %s\n",argv[i+1],argv[i+3])
+        ProcessFiles(argv[i], argv[i+1], argv[i+2], argv[i+3], hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
+        i += 2;
       }
       else {
-        ProcessFiles(argv[i], nullptr, hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
+        printf("\n processing %s\n",argv[i+1])
+        ProcessFiles(argv[i], argv[i+1], nullptr, nullptr, hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
+        i += 1;
       }
     }
   }
@@ -218,7 +221,7 @@ void ReportStats(struct timeval time1, struct timeval time2,
           total_unclassified * 100.0 / stats.total_sequences);
 }
 
-void ProcessFiles(const char *filename1, const char *filename2,
+void ProcessFiles(const char *filename1, const char *filename_1, const char *filename2, const char *filename_2,
     KeyValueStore *hash, Taxonomy &tax,
     IndexOptions &idx_opts, Options &opts, ClassificationStats &stats,
     OutputStreamData &outputs,
@@ -321,7 +324,7 @@ void ProcessFiles(const char *filename1, const char *filename2,
         }
         auto call = ClassifySequence(seq1, seq2,
             kraken_oss, hash, tax, idx_opts, opts, thread_stats, scanner,
-            taxa, hit_counts, translated_frames, thread_taxon_counters);
+            taxa, hit_counts, translated_frames, thread_taxon_counters, filename_1);
         if (call) {
           char buffer[1024] = "";
           sprintf(buffer, " kraken:taxid|%llu",
@@ -499,7 +502,7 @@ taxid_t ClassifySequence(Sequence &dna, Sequence &dna2, ostringstream &koss,
     Options &opts, ClassificationStats &stats, MinimizerScanner &scanner,
     vector<taxid_t> &taxa, taxon_counts_t &hit_counts,
     vector<string> &tx_frames,
-    taxon_counters_t &curr_taxon_counts)
+    taxon_counters_t &curr_taxon_counts, const char *filename_1)
 {
   uint64_t *minimizer_ptr;
   taxid_t call = 0;
@@ -591,6 +594,7 @@ taxid_t ClassifySequence(Sequence &dna, Sequence &dna2, ostringstream &koss,
     koss << "C\t";
   else
     koss << "U\t";
+  koss << filename_1 << "\t";
   if (! opts.paired_end_processing)
     koss << dna.id << "\t";
   else
