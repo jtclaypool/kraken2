@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
   if (optind == argc) {
     if (opts.paired_end_processing && ! opts.single_file_pairs)
       errx(EX_USAGE, "paired end processing used with no files specified");
-    ProcessFiles(nullptr, nullptr, hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
+    ProcessFiles(nullptr, nullptr, nullptr, nullptr, hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
   }
   else {
     for (int i = optind; i < argc; i++) {
@@ -157,12 +157,12 @@ int main(int argc, char **argv) {
         if (i + 1 == argc) {
           errx(EX_USAGE, "paired end processing used with unpaired file");
         }
-        printf("\n processing %s and %s\n",argv[i+1],argv[i+3])
+        printf("\n processing %s and %s\n",argv[i+1],argv[i+3]);
         ProcessFiles(argv[i], argv[i+1], argv[i+2], argv[i+3], hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
         i += 2;
       }
       else {
-        printf("\n processing %s\n",argv[i+1])
+        printf("\n processing %s\n",argv[i+1]);
         ProcessFiles(argv[i], argv[i+1], nullptr, nullptr, hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
         i += 1;
       }
