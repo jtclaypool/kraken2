@@ -169,7 +169,7 @@ if ($compressed) {
     push @persistent_fhs, $fh;
     my $fd = fileno $fh;
     push @replacement_ARGV, "/dev/fd/$fd";
-    push @replacement_ARGV, $file;    
+    push @replacement_ARGV, basename $file;    
   }
   @ARGV = @replacement_ARGV;
 }
