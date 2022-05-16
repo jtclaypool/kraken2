@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
         }
         printf("\n processing %s and %s\n",argv[i+1],argv[i+3]);
         ProcessFiles(argv[i], argv[i+1], argv[i+2], argv[i+3], hash_ptr, taxonomy, idx_opts, opts, stats, outputs, taxon_counters);
-        i += 2;
+        i += 1;
       }
       else {
         printf("\n processing %s\n",argv[i+1]);
